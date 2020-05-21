@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -19,7 +21,10 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,6 +88,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("主活动创建");
         super.onCreate(savedInstanceState);
+        SharedPreferences Infos = getSharedPreferences("data", Context.MODE_PRIVATE);
+        boolean isfirst=Infos.getBoolean("start",false);
+        if(!isfirst){
+            Intent intent2=new Intent(MainActivity.this,AppSlide.class);
+            startActivity(intent2);
+        }
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         EventBus.getDefault().register(this);
         mediaBrowser=new MediaBrowserCompat(this,new ComponentName(this, MediaPlaybackService.class),callback,null);
         mediaBrowser.connect();
@@ -91,20 +103,23 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navView = findViewById(R.id.nav_view);
         Intent intent=getIntent();
         String info=intent.getStringExtra("info");
-        SharedPreferences Infos = getSharedPreferences("data", Context.MODE_PRIVATE);
+        String museumId=intent.getStringExtra("museumid_map");
+
         Infos.edit().putString("info",info).apply();
+        Infos.edit().putString("museumid_map",museumId).apply();
         AppBarConfiguration appBarConfiguration;
             appBarConfiguration = new AppBarConfiguration.Builder(
                     R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
                     .build();
             BottomNavigationView bottomNavigationView=findViewById(R.id.nav_view);
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            bottomNavigationView.setItemIconTintList(null);
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
-                if(destination.getId()==R.id.login){
+                if(destination.getId()==R.id.login||destination.getId()==R.id.regist){
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -243,5 +258,10 @@ public class MainActivity extends AppCompatActivity {
             mediaController.getTransportControls().prepareFromMediaId(msg.msg,null);
         }
     }
-
+/*
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Navigation.findNavController(this,R.id.nav_host_fragment).navigateUp();
+    }*/
 }

@@ -1,125 +1,116 @@
-# BUCT计科1703班4组软件工程课设仓库
+# BUCT计科1703班软件工程课设仓库
 
 ## 使用须知
 设计及周记请移步wiki
 
 本readme用于记录开发进度
 
-2020.5.6
+#### 2020.4.19
+
+更新项目架构，按层对代码进行规划，各位自行挑选需要实现的页面
+
+在接口开发结束之前，请自行找数据测试
+
+将本文件夹fork下来，然后pull request，如果代码更新，在群里通知
+
+如果有不知道是页面是干什么的记得在群里发
+
+* 完成底部导航栏结构
+* 完成新闻webview显示
+* 完成导航设置
+
+#### 2020.4.21
+
+完成地图的搭建完成user显示页搭建
+
+完成设置页显示
+
+#### 2020.5.6
 
 完成登录，退出登录，注册功能，完成详细信息浏览页面搭建，跳转到高德地图功能
 
-## 再次重申，布局请使用约束布局！！！！
-
-2020.5.13
+#### 2020.5.13
 
 加入eventbus及service，现设计网络请求标准如下
 
-### 1 新增服务OnOpenGetMessage
+#### 2020.5.15
 
-简单来说，eventbus是一种应用内广播的简易版，可以把数据在activity，service，fragment之间传递，并且代码极易简介
+完善布局，添加转场动画
 
-目前已经在webhelper里封装了post，get和带cookie的请求以及获取cookie等，可按注释自行查阅
+### 发布预览版1.1
 
-（必须在子线程）
+#### 目前已知bug
 
-OnOpenGetMessage封装了一个线程池，通过eventbus通知服务启动线程池然后开始网络请求
+1 搜索不能点击/闪退
+2 博物馆信息空白，没有安装高德地图的情况下会出错，错误未知
+3 新闻页显示为pc而非手机适配
+4 音频播放动画/声音不搭配
+5 注册页可以直接跳出不需要必须登录
+6 上传其他格式的非音频提示上传成功
+7 上传文件显示乱码
+8 首屏未做缓存
+9 列表查找没有做完
+10 无法评分评论
+11 上传下拉框不全
 
-### 2 代码演示
+#### 2020.5.17 
 
-1 必须要为按需的String字符串创建一个类
+### 发布预览版1.1.2
 
-例如（注意 string必为final）
+#### 1.1.2版本更新
 
-```java
-public class PlayMessage {
-    public final String msg;
+修复博物馆信息空白bug
+新闻页显示为pc而非手机适配
+修复音频播放动画/声音不搭配的bug
+修复注册页可以直接跳出不需要必须登录的bug
 
-    public PlayMessage(String msg) {
-        this.msg = msg;
-    }
-}
-```
+重绘地图标记点
 
-2 在你所在的fragment里注册和解注册eventbus
+新增app内更新功能
 
-例如 在onviewcreate里注册
+部分修复列表无法显示的bug
 
-```java
-EventBus.getDefault().register(this);
-```
+目前已知bug
 
-在ondestory里解注册
+1 搜索不能点击/闪退
 
-```java
-EventBus.getDefault().unregister(this);
-```
+2 没有安装高德地图的情况下会出错，错误未知
 
-在你需要申请网络请求的地方
+3 上传其他格式的非音频提示上传成功
+4 上传文件显示乱码
+5 列表查找没有做完
 
-```java
-EventBus.getDefault()
-        .post(new
-                CommandRequest
-                ("http://192.144.239.176:8080/api/android/get_education_activity_info"));
-```
+6 无法评分评论
+7 上传下拉框不全
 
-这里的commandrequest发送后会按http地址进行网络请求并发送
+8 安装更新息屏后进度条消失（通知中仍能显示）
 
-`EventBus.getDefault().post(new ResultMessage(res));`
+9 地图退出到主页后闪退
 
-这里的即为网络请求结果。
+10 如果没有新版本没有任何提示
 
-如果有按需的，比如post什么的记得提醒我，还没写post的
+其他
 
-最后在fragment里创建函数接受网络请求结果
+大幅缩小app体积
 
-注意，必须带上@**Subscribe**的注解
+#### 2020.5.19
 
-```
-@Subscribe
-public void GetLoginState(loginstatemessage msg){
-//在这里实现你的逻辑
-//不声明所在线程则为子线程，更新ui需要handler等手段
-}
-```
+### 发布预览版1.1.3
 
-### 3 关于接口
+1 修复若干bug
+2 新增了若干bug
+3 新增评论，搜索，列表功能，调整新闻格式
+已知bug
+如果被杀后台更新失败，更新进度条不稳定性报错
 
-接口已全部写入string.xml，使用getResources().getString(R.string.loginurl)来使用接口
+#### 2020.5.19
 
-### 4 关于viewmodel和livedata
+### 发布预览版1.1.4
 
-暂时认为只有需要fragment分发数据时共用，例如fragment套viewpager
-
+尝试适配更多机型
 
 
-2020.5.14
 
-### 新增带cookie的post和get接口
 
-只有按需返回数据时才应调用这些接口，如果需要使用返回体内的header还是需要自己做的
 
-```java
-public class WebRequestMessage {
-    public final String url;
-    public final int requestcode;
-    public final String cookie;
-    public final RequestBody body;
-    // 100为带cookie的get请求，200为post请求，300为带cookie的post请求，400为普通的get请求
-    public WebRequestMessage(String url, int requestcode, String cookie, RequestBody body) {
-        this.url = url;
-        this.requestcode = requestcode;
-        this.cookie = cookie;
-        this.body = body;
-    }
-}
-```
-
-新增请求信息体，按需发送
-
-请求100 返回 ResultMessage
-
-请求200 返回 loginstatemessage
-
-300 和400 返回 PostResultMessage
+## 预计5.20和5.21还有2个版本放出，同志们加油！
